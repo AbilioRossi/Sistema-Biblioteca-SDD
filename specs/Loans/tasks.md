@@ -54,13 +54,13 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - Instanciar e exportar um singleton do `PrismaClient` em `src/lib/prisma.ts`
     - _Requisitos: RN-1 — Cadastro; Design — Prisma ORM_
 
-- [-] 4. Checkpoint — Estrutura base validada
+- [x] 4. Checkpoint — Estrutura base validada
   - Garantir que `npx prisma validate` passa sem erros
   - Garantir que `npx tsc --noEmit` não reporta erros de tipos
   - Fazer commit: `feat(loans): finaliza estrutura base de entidades e repositórios`
 
-- [ ] 5. Caso de Uso: Empréstimo (BorrowUseCase)
-  - [~] 5.1 Implementar BorrowUseCase com validações de negócio
+- [x] 5. Caso de Uso: Empréstimo (BorrowUseCase)
+  - [x] 5.1 Implementar BorrowUseCase com validações de negócio
     - Criar `src/usecases/BorrowUseCase.ts`
     - Receber `{ userId, bookId }` como input
     - Verificar se o livro existe e se `isAvailable === true`; caso contrário lançar `BookNotAvailableError`
@@ -77,8 +77,8 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - **Livro indisponível:** `isAvailable === false` → deve lançar `BookNotAvailableError`
     - _Requisitos: UC01, UC02, RN-2_
 
-- [ ] 6. Caso de Uso: Devolução (ReturnUseCase)
-  - [~] 6.1 Implementar ReturnUseCase com cálculo de multa
+- [x] 6. Caso de Uso: Devolução (ReturnUseCase)
+  - [x] 6.1 Implementar ReturnUseCase com cálculo de multa
     - Criar `src/usecases/ReturnUseCase.ts`
     - Receber `{ loanId }` como input
     - Buscar o empréstimo pelo id; lançar `LoanNotFoundError` se não existir
@@ -97,7 +97,7 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - **Empréstimo inexistente:** deve lançar `LoanNotFoundError`
     - _Requisitos: UC03, RN-3_
 
-- [~] 7. Checkpoint — Regras de negócio validadas
+- [-] 7. Checkpoint — Regras de negócio validadas
   - Executar `npx jest --testPathPattern=usecases --no-coverage` e garantir que todos os testes passam
   - Fazer commit: `feat(loans): finaliza BorrowUseCase e ReturnUseCase com testes unitários`
 

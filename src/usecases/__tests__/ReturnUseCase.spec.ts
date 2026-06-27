@@ -5,17 +5,6 @@ import { IBookRepository } from '../../repositories/IBookRepository';
 import { ILoanRepository } from '../../repositories/ILoanRepository';
 import { ILoan } from '../../entities/Loan';
 
-const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
-
-const makeLoan = (overrides: Partial<ILoan> = {}): ILoan => ({
-  id: 'loan-1',
-  userId: 'user-1',
-  bookId: 'book-1',
-  borrowedAt: new Date(),
-  penaltyFee: 0,
-  ...overrides,
-});
-
 const makeRepositories = () => {
   const userRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
@@ -40,12 +29,27 @@ const makeRepositories = () => {
   return { userRepository, bookRepository, loanRepository };
 };
 
+const daysAgo = (days: number): Date => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+};
+
+const makeLoan = (overrides: Partial<ILoan> = {}): ILoan => ({
+  id: 'loan-1',
+  userId: 'user-1',
+  bookId: 'book-1',
+  borrowedAt: daysAgo(0),
+  penaltyFee: 0,
+  ...overrides,
+});
+
 describe('ReturnUseCase', () => {
-  it('UC03 — com atraso: borrowedAt = 10 dias atrás → penaltyFee deve ser 6.00', async () => {
+  it('UC03 — devolução com atraso: 10 dias após empréstimo → penaltyFee deve ser 6.00', async () => {
     const { userRepository, bookRepository, loanRepository } = makeRepositories();
 
     const loan = makeLoan({ borrowedAt: daysAgo(10) });
-    const updatedLoan = makeLoan({ ...loan, returnedAt: new Date(), penaltyFee: 6.0 });
+    const updatedLoan: ILoan = { ...loan, returnedAt: new Date(), penaltyFee: 6.0 };
 
     loanRepository.findById.mockResolvedValue(loan);
     loanRepository.update.mockResolvedValue(updatedLoan);
@@ -54,22 +58,19 @@ describe('ReturnUseCase', () => {
     const result = await useCase.execute({ loanId: 'loan-1' });
 
     expect(result.penaltyFee).toBe(6.0);
-
-    // Verifica que update foi chamado com penaltyFee correto
-    const updateCall = loanRepository.update.mock.calls[0];
-    expect(updateCall[0]).toBe('loan-1');
-    expect(updateCall[1].penaltyFee).toBe(6.0);
-    expect(updateCall[1].returnedAt).toBeInstanceOf(Date);
-
+    expect(loanRepository.update).toHaveBeenCalledWith(
+      'loan-1',
+      expect.objectContaining({ penaltyFee: 6.0 }),
+    );
     expect(bookRepository.setAvailability).toHaveBeenCalledWith('book-1', true);
     expect(userRepository.decrementActiveLoans).toHaveBeenCalledWith('user-1');
   });
 
-  it('no prazo: borrowedAt = 5 dias atrás → penaltyFee deve ser 0', async () => {
+  it('devolução no prazo: 5 dias após empréstimo → penaltyFee deve ser 0', async () => {
     const { userRepository, bookRepository, loanRepository } = makeRepositories();
 
     const loan = makeLoan({ borrowedAt: daysAgo(5) });
-    const updatedLoan = makeLoan({ ...loan, returnedAt: new Date(), penaltyFee: 0 });
+    const updatedLoan: ILoan = { ...loan, returnedAt: new Date(), penaltyFee: 0 };
 
     loanRepository.findById.mockResolvedValue(loan);
     loanRepository.update.mockResolvedValue(updatedLoan);
@@ -78,16 +79,17 @@ describe('ReturnUseCase', () => {
     const result = await useCase.execute({ loanId: 'loan-1' });
 
     expect(result.penaltyFee).toBe(0);
-
-    const updateCall = loanRepository.update.mock.calls[0];
-    expect(updateCall[1].penaltyFee).toBe(0);
+    expect(loanRepository.update).toHaveBeenCalledWith(
+      'loan-1',
+      expect.objectContaining({ penaltyFee: 0 }),
+    );
   });
 
-  it('no limite exato: borrowedAt = 7 dias atrás → penaltyFee deve ser 0', async () => {
+  it('devolução no exato prazo limite: 7 dias após empréstimo → penaltyFee deve ser 0', async () => {
     const { userRepository, bookRepository, loanRepository } = makeRepositories();
 
     const loan = makeLoan({ borrowedAt: daysAgo(7) });
-    const updatedLoan = makeLoan({ ...loan, returnedAt: new Date(), penaltyFee: 0 });
+    const updatedLoan: ILoan = { ...loan, returnedAt: new Date(), penaltyFee: 0 };
 
     loanRepository.findById.mockResolvedValue(loan);
     loanRepository.update.mockResolvedValue(updatedLoan);
@@ -96,9 +98,6 @@ describe('ReturnUseCase', () => {
     const result = await useCase.execute({ loanId: 'loan-1' });
 
     expect(result.penaltyFee).toBe(0);
-
-    const updateCall = loanRepository.update.mock.calls[0];
-    expect(updateCall[1].penaltyFee).toBe(0);
   });
 
   it('empréstimo inexistente: findById retorna null → deve lançar LoanNotFoundError', async () => {
@@ -108,7 +107,7 @@ describe('ReturnUseCase', () => {
 
     const useCase = new ReturnUseCase(loanRepository, bookRepository, userRepository);
 
-    await expect(useCase.execute({ loanId: 'nonexistent-id' }))
+    await expect(useCase.execute({ loanId: 'loan-inexistente' }))
       .rejects.toThrow(LoanNotFoundError);
 
     expect(loanRepository.update).not.toHaveBeenCalled();

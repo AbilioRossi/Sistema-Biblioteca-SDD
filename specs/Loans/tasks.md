@@ -97,26 +97,26 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - **Empréstimo inexistente:** deve lançar `LoanNotFoundError`
     - _Requisitos: UC03, RN-3_
 
-- [-] 7. Checkpoint — Regras de negócio validadas
+- [x] 7. Checkpoint — Regras de negócio validadas
   - Executar `npx jest --testPathPattern=usecases --no-coverage` e garantir que todos os testes passam
   - Fazer commit: `feat(loans): finaliza BorrowUseCase e ReturnUseCase com testes unitários`
 
-- [ ] 8. Camada de Controllers e Rotas da API
-  - [~] 8.1 Implementar UsersController e BooksController (CRUD básico)
+- [x] 8. Camada de Controllers e Rotas da API
+  - [x] 8.1 Implementar UsersController e BooksController (CRUD básico)
     - Criar `src/controllers/UsersController.ts` com métodos `create` (POST) e `list` (GET)
     - Criar `src/controllers/BooksController.ts` com métodos `create` (POST) e `list` (GET)
     - Cada controller deve receber `req, res` do Express e delegar ao repositório diretamente
     - Retornar status `201` na criação e `200` na listagem
     - _Requisitos: RN-1 — Cadastro; Design — Endpoints `POST /api/users`, `POST /api/books`_
 
-  - [~] 8.2 Implementar LoansController conectando os UseCases
+  - [x] 8.2 Implementar LoansController conectando os UseCases
     - Criar `src/controllers/LoansController.ts`
     - Método `borrow`: chamar `BorrowUseCase`, retornar `201` com o Loan criado
     - Método `return`: chamar `ReturnUseCase`, retornar `200` com o Loan atualizado e a multa
     - Tratar erros customizados: `LimitReachedError` → `422`, `BookNotAvailableError` → `409`, `LoanNotFoundError` → `404`
     - _Requisitos: UC01, UC02, UC03; Design — Endpoints `POST /api/loans`, `PUT /api/loans/:id/return`_
 
-  - [~] 8.3 Configurar rotas do Express e inicializar o servidor
+  - [x] 8.3 Configurar rotas do Express e inicializar o servidor
     - Criar `src/routes/users.routes.ts`, `src/routes/books.routes.ts`, `src/routes/loans.routes.ts`
     - Criar `src/app.ts` registrando os routers com prefixo `/api`
     - Criar `src/server.ts` que importa `app` e chama `app.listen(3000)`
@@ -132,7 +132,7 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - Usar banco de dados de teste isolado via variável `DATABASE_URL` apontando para schema separado ou banco de teste
     - _Requisitos: UC01, UC02, UC03_
 
-- [~] 9. Checkpoint Final — Testes E2E e integração completa
+- [-] 9. Checkpoint Final — Testes E2E e integração completa
   - Executar `npx jest --no-coverage` e garantir que todos os testes (unitários e E2E) passam
   - Executar `npx tsc --noEmit` para verificar erros de tipo
   - Garantir que não há processos Node.js órfãos rodando em background

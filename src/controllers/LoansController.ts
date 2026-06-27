@@ -7,8 +7,20 @@ import { ReturnUseCase } from '../usecases/ReturnUseCase';
 import { BookNotAvailableError } from '../errors/BookNotAvailableError';
 import { LimitReachedError } from '../errors/LimitReachedError';
 import { LoanNotFoundError } from '../errors/LoanNotFoundError';
+import prisma from '../lib/prisma';
 
 export class LoansController {
+  async list(_req: Request, res: Response): Promise<void> {
+    try {
+      const loans = await prisma.loan.findMany({
+        include: { user: true, book: true },
+      });
+      res.status(200).json(loans);
+    } catch {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
   async borrow(req: Request, res: Response): Promise<void> {
     const { userId, bookId } = req.body as { userId: string; bookId: string };
 

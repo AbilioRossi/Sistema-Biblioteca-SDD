@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "ts-node src/server.ts",
-    "build": "npx tsc",
+    "build": "npx prisma generate && npx tsc",
     "test": "jest"
   },
   "keywords": [],

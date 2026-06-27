@@ -1,47 +1,74 @@
+# Plano de Tarefas: Interface Web e Deploy
 
-jh# Plano de Tarefas: Interface Web e Deploy
+- [x] 1. CORS e Endpoints de Leitura na API
+  - [x] 1.1 Instalar cors e configurar no app.ts
+    - Instalar: `npm install cors --no-fund` e `npm install -D @types/cors --no-fund`
+    - Configurar CORS no `src/app.ts` com origens permitidas: `process.env.FRONTEND_URL`, `http://localhost:5500`, `http://127.0.0.1:5500`
+    - Adicionar `FRONTEND_URL=http://localhost:5500` no `.env`
+    - _Requisitos: RN-2 — CORS_
 
-<!-- WAVE 1: Preparação da API -->
+  - [x] 1.2 Adicionar endpoints GET de leitura nos controllers
+    - `UsersController`: adicionar método `list` com `GET /api/users` → `prisma.user.findMany()`
+    - `BooksController`: adicionar método `list` com `GET /api/books` → `prisma.book.findMany()`
+    - Adicionar `GET /api/loans` no `LoansController` → `prisma.loan.findMany({ include: { user: true, book: true } })`
+    - Registrar as rotas GET em `users.routes.ts`, `books.routes.ts` e `loans.routes.ts`
+    - Verificar `npx tsc --noEmit` e fazer commit: `feat(interface): adiciona CORS e endpoints GET de leitura`
+    - _Requisitos: Design — Endpoints Consumidos pelo Frontend_
 
-- [x] **Task 1: Adicionar CORS e Endpoints de Leitura na API**
-  - **Descrição:** Instalar o pacote `cors` (`npm install cors` e `npm install -D @types/cors`) e configurá-lo no `server.ts` conforme o `design.md`, lendo a origem permitida da variável de ambiente `FRONTEND_URL`. Adicionar os endpoints de listagem `GET /api/users`, `GET /api/books` e `GET /api/loans` nos respectivos controllers, implementando apenas uma query `findMany()` no Prisma — sem nova lógica de negócio.
-  - **Validação:** Com o servidor rodando localmente, fazer uma requisição `fetch` a partir de uma página HTML aberta no Live Server (`localhost:5500`) para `GET /api/users` deve retornar status 200 sem erro de CORS no console do browser.
+- [ ] 2. Estrutura Base do Frontend
+  - Depende de: Task 1
+  - [x] 2.1 Criar arquivos base: config.js, api.js, style.css, index.html
+    - Criar `frontend/config.js` com `const API_BASE_URL = 'http://localhost:3000/api'`
+    - Criar `frontend/js/api.js` com funções `get(path)`, `post(path, body)`, `put(path, body)` centralizando o fetch com tratamento de erros
+    - Criar `frontend/css/style.css` com layout sidebar fixa à esquerda + área principal + barra de notificação (verde/vermelho)
+    - Criar `frontend/index.html` redirecionando para `pages/loans.html`
+    - Fazer commit: `feat(interface): cria estrutura base do frontend`
+    - _Requisitos: Design — Estrutura de Arquivos_
 
-<!-- WAVE 2: Frontend -->
+- [x] 3. Tela de Usuários
+  - Depende de: Task 2
+  - [x] 3.1 Criar users.html e users.js
+    - Criar `frontend/pages/users.html` com sidebar, formulário (campo nome + botão Cadastrar) e tabela (ID, Nome, Empréstimos Ativos)
+    - Criar `frontend/js/users.js` chamando `POST /api/users` no submit e `GET /api/users` para popular a tabela
+    - Exibir notificações de sucesso/erro via barra de notificação
+    - Fazer commit: `feat(interface): cria tela de usuários`
+    - _Requisitos: UC01_
 
-- [x] **Task 2: Estrutura Base do Frontend (`config.js`, `api.js`, `style.css`, `index.html`)**
-  - **Depende de:** Task 1
-  - **Descrição:** Criar a pasta `frontend/` com os arquivos base: `config.js` exportando a `API_BASE_URL` apontando para `localhost:3000` em dev; `api.js` com funções `get(path)` e `post(path, body)` e `put(path, body)` que centralizam o `fetch`, tratam erros HTTP e lançam o texto do erro da API; `style.css` com o layout de sidebar + área principal + barra de notificação; `index.html` redirecionando para `pages/loans.html`.
-  - **Validação:** Abrir o `index.html` no Live Server deve redirecionar para a tela de Empréstimos e exibir o layout com sidebar sem erros no console.
+- [x] 4. Tela de Livros
+  - Depende de: Task 2
+  - [x] 4.1 Criar books.html e books.js
+    - Criar `frontend/pages/books.html` com sidebar, formulário (campo título + botão Cadastrar) e tabela (ID, Título, Disponível)
+    - Criar `frontend/js/books.js` chamando `POST /api/books` e `GET /api/books`
+    - Fazer commit: `feat(interface): cria tela de livros`
+    - _Requisitos: UC02_
 
-- [x] **Task 3: Tela de Usuários (`users.html` + `users.js`)**
-  - **Depende de:** Task 2
-  - **Descrição:** Criar a tela de Usuários com formulário de cadastro (campo nome + botão "Cadastrar") e tabela de listagem (colunas: ID, Nome, Empréstimos Ativos). O `users.js` deve chamar `POST /api/users` no submit do formulário e `GET /api/users` para popular a tabela — recarregando a tabela após cada cadastro bem-sucedido. Exibir mensagem de sucesso ou erro via a barra de notificação definida no `style.css`.
-  - **Validação:** Cadastrar dois usuários pela tela e confirmar que ambos aparecem na tabela e estão persistidos no banco.
+- [x] 5. Tela de Empréstimos
+  - Depende de: Task 3, Task 4
+  - [x] 5.1 Criar loans.html e loans.js
+    - Criar `frontend/pages/loans.html` com sidebar, formulário com dois selects (usuário + livro disponível) e tabela de empréstimos ativos (Usuário, Livro, Data, Ação)
+    - Criar `frontend/js/loans.js`:
+      - Popular selects via `GET /api/users` e `GET /api/books` (filtrar `isAvailable === true`)
+      - Botão Emprestar → `POST /api/loans`
+      - Botão Devolver → `PUT /api/loans/:id/return`, exibir multa na notificação ("Devolução registrada. Multa: R$ X,XX")
+    - Fazer commit: `feat(interface): cria tela de empréstimos`
+    - _Requisitos: UC03, UC04_
 
-- [x] **Task 4: Tela de Livros (`books.html` + `books.js`)**
-  - **Depende de:** Task 2
-  - **Descrição:** Criar a tela de Livros com formulário de cadastro (campo título + botão "Cadastrar") e tabela de listagem (colunas: ID, Título, Disponível). Lógica análoga à Task 3, consumindo `POST /api/books` e `GET /api/books`.
-  - **Validação:** Cadastrar um livro e confirmar que ele aparece na tabela com status "Disponível". Após realizar um empréstimo (pela tela de empréstimos), recarregar a tela de Livros e confirmar que o status muda para "Indisponível".
+- [x] 6. Tela de Relatórios
+  - Depende de: Task 2
+  - [x] 6.1 Criar reports.html e reports.js
+    - Criar `frontend/pages/reports.html` com sidebar, dois botões (Ver Inadimplentes / Livros Populares) e duas tabelas de resultado
+    - Criar `frontend/js/reports.js`:
+      - Ver Inadimplentes → `GET /api/reports/overdue` → tabela (Usuário, Livro, Dias de Atraso, Multa Estimada)
+      - Livros Populares → `GET /api/reports/popular-books` → tabela (Livro, Total de Empréstimos)
+      - Estado de "Carregando..." em cada botão enquanto a requisição ocorre
+    - Fazer commit: `feat(interface): cria tela de relatórios`
+    - _Requisitos: UC05, UC06_
 
-- [x] **Task 5: Tela de Empréstimos (`loans.html` + `loans.js`)**
-  - **Depende de:** Task 3, Task 4
-  - **Descrição:** Criar a tela de Empréstimos com: (1) formulário com dois `<select>` — um para usuário (populado via `GET /api/users`) e um para livro disponível (populado via `GET /api/books`, filtrando `isAvailable === true`) — e botão "Emprestar" que chama `POST /api/loans`; (2) tabela de empréstimos ativos (colunas: Usuário, Livro, Data do Empréstimo, Ação) com botão "Devolver" por linha, que chama `PUT /api/loans/:id/return` e exibe o valor da multa na mensagem de sucesso (ex: "Devolução registrada. Multa: R$ 6,00").
-  - **Validação:** Realizar um empréstimo e depois uma devolução via interface, confirmando que a multa correta é exibida (simular atraso ajustando `borrowedAt` direto no banco para testar).
-
-- [x] **Task 6: Tela de Relatórios (`reports.html` + `reports.js`)**
-  - **Depende de:** Task 2
-  - **Descrição:** Criar a tela de Relatórios com dois botões de ação e duas tabelas de resultado na mesma página. "Ver Inadimplentes" chama `GET /api/reports/overdue` e renderiza tabela com colunas (Usuário, Livro, Dias de Atraso, Multa Estimada). "Livros Populares" chama `GET /api/reports/popular-books` e renderiza tabela com colunas (Livro, Total de Empréstimos). Cada botão deve exibir um estado de "Carregando..." enquanto a requisição está em andamento.
-  - **Validação:** Com dados de atraso no banco, clicar em "Ver Inadimplentes" deve retornar a lista correta. Clicar em "Livros Populares" deve retornar os livros em ordem decrescente de empréstimos.
-
-<!-- WAVE 3: Deploy -->
-
-- [x] **Task 7: Deploy da API no Railway**
-  - **Depende de:** Task 1
-  - **Descrição:** Criar o arquivo `railway.json` na raiz do repositório conforme o `design.md`. Criar um projeto no Railway, conectar ao repositório GitHub, provisionar o plugin PostgreSQL e configurar as variáveis de ambiente: `DATABASE_URL` (gerada automaticamente pelo Railway) e `FRONTEND_URL` (URL do Vercel, pode ser configurada após a Task 8). Fazer o primeiro deploy e verificar os logs.
-  - **Validação:** A URL pública gerada pelo Railway (ex: `https://biblioteca-api.up.railway.app/api/users`) deve retornar `[]` com status 200 ao ser acessada pelo browser.
-
-- [x] **Task 8: Deploy do Frontend no Vercel**
-  - **Depende de:** Task 6, Task 7
-  - **Descrição:** Criar o arquivo `vercel.json` na raiz do repositório conforme o `design.md`. Atualizar o `config.js` do frontend para apontar para a URL pública da API no Railway. Criar um projeto no Vercel, conectar ao repositório GitHub e definir a pasta `frontend/` como diretório raiz. Após o deploy, copiar a URL do Vercel e adicioná-la como `FRONTEND_URL` no Railway para finalizar a configuração do CORS.
-  - **Validação:** Acessar a URL pública do Vercel, navegar por todas as telas, cadastrar um usuário e um livro, realizar um empréstimo e gerar um relatório — tudo sem erros de CORS ou de rede.
+- [x] 7. Arquivos de Configuração de Deploy
+  - Depende de: Task 1
+  - [x] 7.1 Criar railway.json e vercel.json
+    - Criar `railway.json` na raiz com build NIXPACKS e startCommand `npx prisma migrate deploy && node dist/server.js`
+    - Criar `vercel.json` na raiz apontando root para `frontend/`
+    - Adicionar script `"build": "npx tsc"` no `package.json`
+    - Fazer commit: `feat(interface): adiciona arquivos de configuração de deploy`
+    - _Requisitos: UC07, UC08 — Deploy_

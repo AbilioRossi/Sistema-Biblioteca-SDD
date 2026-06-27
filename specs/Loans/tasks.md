@@ -132,7 +132,7 @@ Implementação do módulo de empréstimos seguindo Clean Architecture (Entities
     - Usar banco de dados de teste isolado via variável `DATABASE_URL` apontando para schema separado ou banco de teste
     - _Requisitos: UC01, UC02, UC03_
 
-- [-] 9. Checkpoint Final — Testes E2E e integração completa
+- [ ] 9. Checkpoint Final — Testes E2E e integração completa
   - Executar `npx jest --no-coverage` e garantir que todos os testes (unitários e E2E) passam
   - Executar `npx tsc --noEmit` para verificar erros de tipo
   - Garantir que não há processos Node.js órfãos rodando em background

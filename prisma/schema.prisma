@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String @id @default(cuid())
+  name             String
+  activeLoansCount Int    @default(0)
+  loans            Loan[]
+}
+
+model Book {
+  id          String  @id @default(cuid())
+  title       String
+  isAvailable Boolean @default(true)
+  loans       Loan[]
+}
+
+model Loan {
+  id         String    @id @default(cuid())
+  userId     String
+  bookId     String
+  borrowedAt DateTime  @default(now())
+  returnedAt DateTime?
+  penaltyFee Float     @default(0)
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+}
